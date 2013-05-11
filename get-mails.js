@@ -1,7 +1,7 @@
 var Imap = require('imap'),
     inspect = require('util').inspect,
     fs = require('fs'),
-    filestream;
+    lastmail;
 
 var imap = new Imap({
         user: 'test@hochoertler.at',
@@ -27,53 +27,46 @@ function openInbox(cb) {
     });
 };
 
-var checkMails = function () {
-    openInbox(function(err, mailbox) {
-        if (err) die(err);
-            imap.seq.fetch(mailbox.messages.total + ':*', { struct: false }, {
-                headers: 'from',
-                body: true,
-                cb: function(fetch) {
-                    fetch.on('message', function(msg) {
 
-                    filestream = fs.createWriteStream('letzter-einsatz.txt');
-                    console.log('Saw message no. ' + msg.seqno);
+var startChecking = function (io) {
+    io.sockets.on('connection', function (socket) {
+    
+        var checkMails = function () {
+            openInbox(function(err, mailbox) {
+                if (err) die(err);
+                    imap.seq.fetch(mailbox.messages.total + ':*', { struct: false }, {
+                        headers: ['subject', 'date'],
+                        body: false,
+                        cb: function(fetch) {
+                            fetch.on('message', function(msg) {
 
-                    var body = '';
+                            var body;
 
-                    msg.on('headers', function(hdrs) {
-                        console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs));
-                    });
+                            msg.on('headers', function(hdrs) {
+                                if (lastmail === msg.uid) return;
+                                socket.emit('mail', {UID: msg.uid, date: msg.date, subject: hdrs.subject.toString('utf8')});
+                                lastmail = msg.uid;
+                            });
 
-                    msg.on('data', function(chunk) {
-                        body += chunk.toString('utf8');
-                    });
+                            /*msg.on('data', function(chunk) {
+                                body = chunk.toString('utf8');
+                            });*/
 
-                    msg.on('end', function() {
-                        var string = 'Date: ' + msg.date;
-                        string += body;
-
-                        /*console.log('Finished message no. ' + msg.seqno);
-                        console.log('UID: ' + msg.uid);
-                        console.log('Flags: ' + msg.flags);
-                        console.log('Date: ' + msg.date);
-                        console.log('Body: ' + show(body));*/
-
-                        filestream.write(string);
-                        filestream.end();
-                    });
+                            /*msg.on('end', function() {
+                                socket.emit('mail', {UID: msg.uid, date: msg.date, msg: body});
+                            });*/
+                        });
+                    }
+                }, function(err) {
+                    if (err) throw err;
+                    console.log('Done fetching all messages!');
+                    imap.logout();
                 });
-            }
-        }, function(err) {
-            if (err) throw err;
-            console.log('Done fetching all messages!');
-            imap.logout();
-        });
-    });
-};
+            });
+        };
 
-var startChecking = function () {
-    setInterval(checkMails, 10000); 
+        setInterval(checkMails, 10000);
+    }); 
 };
 
 exports.startChecking = startChecking;
