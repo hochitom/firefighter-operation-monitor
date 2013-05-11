@@ -1,5 +1,7 @@
 var Imap = require('imap'),
-    inspect = require('util').inspect;
+    inspect = require('util').inspect,
+    fs = require('fs'),
+    filestream;
 
 var imap = new Imap({
         user: 'test@hochoertler.at',
@@ -11,19 +13,19 @@ var imap = new Imap({
 
 function show(obj) {
     return inspect(obj, false, Infinity);
-}
+};
 
 function die(err) {
     console.log('Uh oh: ' + err);
     process.exit(1);
-}
+};
 
 function openInbox(cb) {
     imap.connect(function(err) {
         if (err) die(err);
         imap.openBox('INBOX', true, cb);
     });
-}
+};
 
 var checkMails = function () {
     openInbox(function(err, mailbox) {
@@ -34,6 +36,7 @@ var checkMails = function () {
                 cb: function(fetch) {
                     fetch.on('message', function(msg) {
 
+                    filestream = fs.createWriteStream('letzter-einsatz.txt');
                     console.log('Saw message no. ' + msg.seqno);
 
                     var body = '';
@@ -47,11 +50,17 @@ var checkMails = function () {
                     });
 
                     msg.on('end', function() {
-                        console.log('Finished message no. ' + msg.seqno);
+                        var string = 'Date: ' + msg.date;
+                        string += body;
+
+                        /*console.log('Finished message no. ' + msg.seqno);
                         console.log('UID: ' + msg.uid);
                         console.log('Flags: ' + msg.flags);
                         console.log('Date: ' + msg.date);
-                        console.log('Body: ' + show(body));
+                        console.log('Body: ' + show(body));*/
+
+                        filestream.write(string);
+                        filestream.end();
                     });
                 });
             }
