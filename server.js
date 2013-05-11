@@ -1,60 +1,9 @@
-var Imap = require('imap'),
-    inspect = require('util').inspect;
+var http = require('http'),
+    ecstatic = require('ecstatic'),
+    mail = require('./get-mails').startChecking();
 
-var imap = new Imap({
-      user: 'test@hochoertler.at',
-      password: '9488232',
-      host: 'mail.hochoertler.at',
-      port: 143,
-      secure: false
-    });
+http.createServer(
+    ecstatic({ root: __dirname + '/public' })
+).listen(3000);
 
-function show(obj) {
-  return inspect(obj, false, Infinity);
-}
-
-function die(err) {
-  console.log('Uh oh: ' + err);
-  process.exit(1);
-}
-
-function openInbox(cb) {
-  imap.connect(function(err) {
-    console.log('hallo 2')
-    if (err) die(err);
-    console.log('hallo 3')
-    imap.openBox('INBOX', true, cb);
-  });
-}
-
-openInbox(function(err, mailbox) {
-  if (err) die(err);
-  imap.seq.fetch(mailbox.messages.total + ':*', { struct: false },
-    { headers: 'from',
-      body: true,
-      cb: function(fetch) {
-        fetch.on('message', function(msg) {
-          console.log('Saw message no. ' + msg.seqno);
-          var body = '';
-          msg.on('headers', function(hdrs) {
-            console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs));
-          });
-          msg.on('data', function(chunk) {
-            body += chunk.toString('utf8');
-          });
-          msg.on('end', function() {
-            console.log('Finished message no. ' + msg.seqno);
-            console.log('UID: ' + msg.uid);
-            console.log('Flags: ' + msg.flags);
-            console.log('Date: ' + msg.date);
-            console.log('Body: ' + show(body));
-          });
-        });
-      }
-    }, function(err) {
-      if (err) throw err;
-      console.log('Done fetching all messages!');
-      imap.logout();
-    }
-  );
-});
+console.log('Listening on :3000');

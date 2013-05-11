@@ -1,0 +1,30 @@
+Return-Path: <hochitom@icloud.com>
+Delivered-To: test@hochoertler.at
+Received: (qmail 5464 invoked by uid 7799); 11 May 2013 08:02:48 -0000
+Received: by simscan 1.4.0 ppid: 5416, pid: 5459, t: 0.1188s
+         scanners: clamav: 0.97.3/m:46/d:7299
+Received: from unknown (HELO st11p02mm-asmtp003.mac.com) (17.172.220.238)
+  by host18.ssl-gesichert.at with SMTP; 11 May 2013 08:02:47 -0000
+Received-DT-Greylist: skipped (host18.ssl-gesichert.at)
+Received: from [192.168.1.116] ([213.173.75.108]) by st11p02mm-asmtp003.mac.com
+ (Oracle Communications Messaging Server 7u4-24.01(7.0.4.24.0) 64bit (built Jan
+  3 2012)) with ESMTPSA id <0MMM00CI0JO21A50@st11p02mm-asmtp003.mac.com> for
+ test@hochoertler.at; Sat, 11 May 2013 08:02:28 +0000 (GMT)
+X-Proofpoint-Virus-Version: vendor=fsecure
+ engine=2.50.10432:5.10.8626,1.0.431,0.0.0000
+ definitions=2013-05-11_03:2013-05-10,2013-05-11,1970-01-01 signatures=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0
+ ipscore=0 suspectscore=0 phishscore=0 bulkscore=0 adultscore=0 classifier=spam
+ adjust=0 reason=mlx scancount=1 engine=6.0.2-1305010000
+ definitions=main-1305110016
+From: =?iso-8859-1?Q?Thomas_Hoch=F6rtler?= <hochitom@icloud.com>
+Content-type: text/plain; charset=us-ascii
+Content-transfer-encoding: 7bit
+Subject: testen
+Message-id: <A526B2A2-85DC-4494-B49F-6CE6EAC31FE5@icloud.com>
+Date: Sat, 11 May 2013 10:02:25 +0200
+To: "test@hochoertler.at" <test@hochoertler.at>
+MIME-version: 1.0 (Mac OS X Mail 6.3 \(1503\))
+X-Mailer: Apple Mail (2.1503)
+
+wieder ein fest
