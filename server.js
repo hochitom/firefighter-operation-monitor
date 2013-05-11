@@ -5,7 +5,7 @@ var imap = new Imap({
       user: 'test@hochoertler.at',
       password: '9488232',
       host: 'mail.hochoertler.at',
-      port: 993,
+      port: 143,
       secure: false
     });
 
@@ -20,33 +20,41 @@ function die(err) {
 
 function openInbox(cb) {
   imap.connect(function(err) {
+    console.log('hallo 2')
     if (err) die(err);
+    console.log('hallo 3')
     imap.openBox('INBOX', true, cb);
   });
 }
 
 openInbox(function(err, mailbox) {
   if (err) die(err);
-  imap.search([ 'UNSEEN', ['SINCE', 'May 20, 2010'] ], function(err, results) {
-    if (err) die(err);
-    imap.fetch(results,
-      { headers: ['from', 'to', 'subject', 'date'],
-        cb: function(fetch) {
-          fetch.on('message', function(msg) {
-            console.log('Saw message no. ' + msg.seqno);
-            msg.on('headers', function(hdrs) {
-              console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs));
-            });
-            msg.on('end', function() {
-              console.log('Finished message no. ' + msg.seqno);
-            });
+  imap.seq.fetch(mailbox.messages.total + ':*', { struct: false },
+    { headers: 'from',
+      body: true,
+      cb: function(fetch) {
+        fetch.on('message', function(msg) {
+          console.log('Saw message no. ' + msg.seqno);
+          var body = '';
+          msg.on('headers', function(hdrs) {
+            console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs));
           });
-        }
-      }, function(err) {
-        if (err) throw err;
-        console.log('Done fetching all messages!');
-        imap.logout();
+          msg.on('data', function(chunk) {
+            body += chunk.toString('utf8');
+          });
+          msg.on('end', function() {
+            console.log('Finished message no. ' + msg.seqno);
+            console.log('UID: ' + msg.uid);
+            console.log('Flags: ' + msg.flags);
+            console.log('Date: ' + msg.date);
+            console.log('Body: ' + show(body));
+          });
+        });
       }
-    );
-  });
+    }, function(err) {
+      if (err) throw err;
+      console.log('Done fetching all messages!');
+      imap.logout();
+    }
+  );
 });
