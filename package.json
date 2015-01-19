@@ -4,9 +4,6 @@
   "description": "returns the actual firefighter emergency",
   "main": "index.js",
   "dependencies": {
-    "imap-message-stream": "^0.0.2",
-    "socket.io": "^0.9.14",
-    "ecstatic": "^0.4.2",
     "imap": "^0.7.11"
   },
   "devDependencies": {},
