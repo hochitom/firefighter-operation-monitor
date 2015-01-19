@@ -1,11 +1,15 @@
-var Imap = require('imap'),
-    inspect = require('util').inspect,
-    fs = require('fs');
+'use strict';
+
+var config = require('./config');
+var Imap = require('imap');
+var inspect = require('util').inspect;
+
+var lastmail;
 
 var imap = new Imap({
-        user: '',
-        password: '',
-        host: '',
+        user: config.user,
+        password: config.password,
+        host: config.host,
         port: 143,
         secure: false
     });
@@ -27,51 +31,34 @@ function openInbox(cb) {
 };
 
 
-var startChecking = function (io) {
-    io.sockets.on('connection', function (socket) {
-        var interval;
-        var lastmail;
+var startChecking = function () {
+    var checkMails = function () {
+        console.log('check');
+        openInbox(function(err, mailbox) {
+            if (err) die(err);
 
-        var checkMails = function () {
-            openInbox(function(err, mailbox) {
-                if (err) die(err);
-                    imap.seq.fetch(mailbox.messages.total + ':*', { struct: false }, {
-                        headers: ['subject', 'date'],
-                        body: false,
-                        cb: function(fetch) {
-                            fetch.on('message', function(msg) {
-
-                            var body;
-
-                            msg.on('headers', function(hdrs) {
-                                if (lastmail === msg.uid) return;
-                                socket.emit('mail', {UID: msg.uid, date: msg.date, subject: hdrs.subject.toString('utf8')});
-                                lastmail = msg.uid;
-                            });
-
-                            /*msg.on('data', function(chunk) {
-                                body = chunk.toString('utf8');
-                            });*/
-
-                            /*msg.on('end', function() {
-                                socket.emit('mail', {UID: msg.uid, date: msg.date, msg: body});
-                            });*/
+            imap.seq.fetch(mailbox.messages.total + ':*', { struct: false }, {
+                headers: ['subject', 'date'],
+                body: false,
+                cb: function(fetch) {
+                    fetch.on('message', function(msg) {
+                        var body;
+                        msg.on('headers', function(hdrs) {
+                            if (lastmail === msg.uid) return;
+                            console.log({UID: msg.uid, date: msg.date, subject: hdrs.subject.toString('utf8')});
+                            lastmail = msg.uid;
                         });
-                    }
-                }, function(err) {
-                    if (err) throw err;
-                    console.log('Done fetching all messages!');
-                    imap.logout();
-                });
+                    });
+                }
+            }, function(err) {
+                if (err) throw err;
+                console.log('Done fetching all messages!');
+                imap.logout();
             });
-        };
-
-        socket.on('disconnect', function () {
-            clearInterval(interval);
         });
+    };
 
-        interval = setInterval(checkMails, 10000);
-    });
+    var interval = setInterval(checkMails, 10000);
 };
 
-exports.startChecking = startChecking;
+module.exports = startChecking;

@@ -4,7 +4,8 @@
   "description": "returns the actual firefighter emergency",
   "main": "index.js",
   "dependencies": {
-    "imap": "^0.7.11"
+    "imap": "^0.7.11",
+    "mongoose": "^3.8.21"
   },
   "devDependencies": {},
   "scripts": {
