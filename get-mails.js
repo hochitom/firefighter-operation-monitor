@@ -29,7 +29,7 @@ function openInbox(cb) {
 
 var startChecking = function () {
     var checkMails = function () {
-        console.log('checking for mails');
+        console.log(new Date() + ': checking for mails');
         openInbox(function(err, mailbox) {
             if (err) die(err);
 
@@ -51,7 +51,7 @@ var startChecking = function () {
                             });
 
                             emergency.save(function (err) {
-                                if (err) console.error('failed');
+                                if (err) console.error('saving to database failed!');
                             });
                         });
                     });
