@@ -15,3 +15,5 @@ npm-debug.log
 letzter-einsatz.txt
 /node_modules/*
 .DS_Store
+
+config.js
