@@ -1,12 +1,11 @@
 var Imap = require('imap'),
     inspect = require('util').inspect,
-    fs = require('fs'),
-    lastmail;
+    fs = require('fs');
 
 var imap = new Imap({
-        user: 'test@hochoertler.at',
-        password: '9488232',
-        host: 'mail.hochoertler.at',
+        user: '',
+        password: '',
+        host: '',
         port: 143,
         secure: false
     });
@@ -30,7 +29,9 @@ function openInbox(cb) {
 
 var startChecking = function (io) {
     io.sockets.on('connection', function (socket) {
-    
+        var interval;
+        var lastmail;
+
         var checkMails = function () {
             openInbox(function(err, mailbox) {
                 if (err) die(err);
@@ -65,8 +66,12 @@ var startChecking = function (io) {
             });
         };
 
-        setInterval(checkMails, 10000);
-    }); 
+        socket.on('disconnect', function () {
+            clearInterval(interval);
+        });
+
+        interval = setInterval(checkMails, 10000);
+    });
 };
 
 exports.startChecking = startChecking;
