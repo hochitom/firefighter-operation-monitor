@@ -3,29 +3,25 @@
 var config = require('./config');
 var Imap = require('imap');
 var inspect = require('util').inspect;
+var Emergency = require('./model');
 
 var lastmail;
 
 var imap = new Imap({
-        user: config.user,
-        password: config.password,
-        host: config.host,
-        port: 143,
-        secure: false
-    });
-
-function show(obj) {
-    return inspect(obj, false, Infinity);
-};
-
-function die(err) {
-    console.log('Uh oh: ' + err);
-    process.exit(1);
-};
+    user: config.user,
+    password: config.password,
+    host: config.host,
+    port: 143,
+    secure: false
+});
 
 function openInbox(cb) {
     imap.connect(function(err) {
-        if (err) die(err);
+        if (err) {
+            console.error('error while checking for mails');
+            console.error(err);
+            return;
+        }
         imap.openBox('INBOX', true, cb);
     });
 };
@@ -33,7 +29,7 @@ function openInbox(cb) {
 
 var startChecking = function () {
     var checkMails = function () {
-        console.log('check');
+        console.log('checking for mails');
         openInbox(function(err, mailbox) {
             if (err) die(err);
 
@@ -45,13 +41,26 @@ var startChecking = function () {
                         var body;
                         msg.on('headers', function(hdrs) {
                             if (lastmail === msg.uid) return;
-                            console.log({UID: msg.uid, date: msg.date, subject: hdrs.subject.toString('utf8')});
+
                             lastmail = msg.uid;
+
+                            var emergency = new Emergency({
+                                UID: msg.uid,
+                                date: msg.date,
+                                subject: hdrs.subject.toString('utf8')
+                            });
+
+                            emergency.save(function (err) {
+                                if (err) console.error('failed');
+                            });
                         });
                     });
                 }
             }, function(err) {
-                if (err) throw err;
+                if (err) {
+                    console.error(err);
+                }
+
                 console.log('Done fetching all messages!');
                 imap.logout();
             });
