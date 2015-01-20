@@ -56,7 +56,7 @@ var startChecking = function () {
                                 if (err) console.error('saving to database failed!');
                             });
 
-                            imap.logout();
+                            imap.end();
                         });
                     });
                 }
@@ -66,7 +66,7 @@ var startChecking = function () {
                 }
 
                 console.log('Done fetching all messages!');
-                imap.logout();
+                imap.end();
             });
         });
     };
