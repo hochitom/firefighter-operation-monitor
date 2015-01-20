@@ -44,6 +44,8 @@ var startChecking = function () {
 
                             lastmail = msg.uid;
 
+                            console.log(hdrs);
+
                             var emergency = new Emergency({
                                 UID: msg.uid,
                                 date: msg.date,
