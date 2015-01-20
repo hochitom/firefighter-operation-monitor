@@ -55,6 +55,8 @@ var startChecking = function () {
                             emergency.save(function (err) {
                                 if (err) console.error('saving to database failed!');
                             });
+
+                            imap.logout();
                         });
                     });
                 }
@@ -69,7 +71,7 @@ var startChecking = function () {
         });
     };
 
-    var interval = setInterval(checkMails, 10000);
+    var interval = setInterval(checkMails, 30000);
 };
 
 module.exports = startChecking;
