@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "returns the actual firefighter emergency",
   "main": "index.js",
+  "engines": {
+    "node": "0.10.x"
+  },
   "dependencies": {
     "imap": "^0.7.11",
     "mongoose": "^3.8.21"
