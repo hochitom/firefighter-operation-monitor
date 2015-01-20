@@ -19,7 +19,7 @@ http.createServer(function (req, res) {
         .select('name date subject')
         .exec(function (err, emergency) {
             console.log(emergency);
-            
+
             if (err) {
                 console.error(err);
                 res.writeHead(503, {'Content-Type': 'text/plain'});
@@ -30,6 +30,6 @@ http.createServer(function (req, res) {
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.end(JSON.stringify(emergency));
         });
-}).listen(config.port, '127.0.0.1');
+}).listen(config.port, '0.0.0.0');
 
 console.log('Listening on :' + config.port);
