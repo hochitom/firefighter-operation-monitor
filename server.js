@@ -25,7 +25,7 @@ http.createServer(function (req, res) {
                 return;
             }
 
-            res.writeHead(200, {'Content-Type': 'text/plain'});
+            res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify(emergency));
         });
 }).listen(config.port, '0.0.0.0');
