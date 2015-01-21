@@ -30,14 +30,18 @@ function openInbox(cb) {
 };
 
 var checkMails = function () {
-    console.log(new Date() + ': checking for mails');
+    console.log('checking for mails');
 
     openInbox(function(err, box) {
         console.log('...');
-        console.log(box);
 
         if (err) {
             console.error(err);
+            return;
+        }
+
+        if (box.uidnext === lastmail) {
+            console.log('same uid as last mail');
             return;
         }
 
@@ -54,16 +58,10 @@ var checkMails = function () {
 
         //var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM SUBJECT)','TEXT'] });
         f.on('message', function(msg, seqno) {
-            console.log('Message #%d', seqno);
             var prefix = '(#' + seqno + ') ';
 
-            if (seqno === lastmail) {
-                console.log('same as last mail');
-                return;
-            }
-
             data = {};
-            data.UID = seqno;
+            data.UID = box.uidnext;
 
             msg.on('body', function(stream, info) {
                 /*if (info.which === 'TEXT') {
@@ -83,13 +81,12 @@ var checkMails = function () {
 
                 stream.once('end', function() {
                     if (info.which !== 'TEXT') {
-                        console.log(data);
                         data.subject = Imap.parseHeader(buffer).subject[0].toString('utf8');
                         data.date = Imap.parseHeader(buffer).date[0];
 
                         console.log(prefix + 'Parsed header: %s', inspect(Imap.parseHeader(buffer)));
                     } else {
-                        console.log(buffer);
+                        console.log(inspect(Imap.parseHeader(buffer)));
                         console.log(prefix + 'Body [%s] Finished', inspect(info.which));
                     }
                 });
