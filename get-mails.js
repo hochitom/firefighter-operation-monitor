@@ -61,7 +61,6 @@ var checkMails = function () {
             var prefix = '(#' + seqno + ') ';
 
             data = {};
-            data.UID = box.uidnext;
 
             msg.on('body', function(stream, info) {
                 /*if (info.which === 'TEXT') {
@@ -93,6 +92,8 @@ var checkMails = function () {
             });
 
             msg.once('attributes', function(attrs) {
+                console.log(attrs);
+                data.uid = attrs.uid;
                 console.log(prefix + 'Attributes: %s', inspect(attrs, false, 8));
             });
 
