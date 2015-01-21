@@ -34,30 +34,41 @@ var checkMails = function () {
 
     openInbox(function(err, box) {
         console.log('...');
+        console.log(box);
+
         if (err) {
             console.error(err);
             return;
         }
 
-        var data = {};
+        if (box.messages.new === 0) {
+            console.log('no new messages');
+            return;
+        }
+
+        var data = false;
 
         var f = imap.seq.fetch(box.messages.total + ':*', {
-            bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
-            struct: true
+            bodies: ['HEADER.FIELDS (FROM SUBJECT DATE)','TEXT']
         });
 
-        //var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM)','TEXT'] });
+        //var f = imap.seq.fetch(box.messages.total + ':*', { bodies: ['HEADER.FIELDS (FROM SUBJECT)','TEXT'] });
         f.on('message', function(msg, seqno) {
             console.log('Message #%d', seqno);
             var prefix = '(#' + seqno + ') ';
 
+            if (seqno === lastmail) {
+                console.log('same as last mail');
+                return;
+            }
 
+            data = {};
             data.UID = seqno;
 
             msg.on('body', function(stream, info) {
-                if (info.which === 'TEXT') {
+                /*if (info.which === 'TEXT') {
                     console.log(prefix + 'Body [%s] found, %d total bytes', inspect(info.which), info.size);
-                }
+                }*/
 
                 var buffer = '', count = 0;
 
@@ -66,17 +77,19 @@ var checkMails = function () {
                     buffer += chunk.toString('utf8');
 
                     if (info.which === 'TEXT') {
-                        console.log(prefix + 'Body [%s] (%d/%d)', inspect(info.which), count, info.size);
+                        //console.log(prefix + 'Body [%s] (%d/%d)', inspect(info.which), count, info.size);
                     }
                 });
 
                 stream.once('end', function() {
                     if (info.which !== 'TEXT') {
+                        console.log(data);
                         data.subject = Imap.parseHeader(buffer).subject[0].toString('utf8');
                         data.date = Imap.parseHeader(buffer).date[0];
 
                         console.log(prefix + 'Parsed header: %s', inspect(Imap.parseHeader(buffer)));
                     } else {
+                        console.log(buffer);
                         console.log(prefix + 'Body [%s] Finished', inspect(info.which));
                     }
                 });
@@ -98,13 +111,20 @@ var checkMails = function () {
         f.once('end', function() {
             console.log('Done fetching all messages!');
 
+            if (!data) return;
+
             var emergency = new Emergency(data);
 
-            emergency.save(function (err) {
-                if (err) console.error('saving to database failed!');
+            emergency.save(function (err, data) {
+                if (err) {
+                    console.error('saving to database failed!');
+                    return;
+                }
+
+                lastmail = data.UID;
             });
 
-            imap.end();
+            //imap.end();
         });
     });
 };
@@ -112,7 +132,7 @@ var checkMails = function () {
 
 var startChecking = function () {
     imap.once('ready', function() {
-        var interval = setInterval(checkMails, 30000);
+        var interval = setInterval(checkMails, 10000);
         checkMails();
     });
 
