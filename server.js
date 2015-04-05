@@ -28,7 +28,7 @@ http.createServer(function (req, res) {
 
             res.writeHead(200, {
                 'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin', 'http://localhost:8000'
+                'Access-Control-Allow-Origin': 'http://localhost:8000'
             });
 
             res.end(JSON.stringify(emergency));
